@@ -1,10 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- Growth & Clarity Design System Colors -->
+    <color name="primary">#FF006c46</color>
+    <color name="on_primary">#FFFFFFFF</color>
+    <color name="primary_container">#FF2eb67d</color>
+    <color name="on_primary_container">#FF004128</color>
+    <color name="inverse_primary">#FF5edda0</color>
+
+    <color name="secondary">#FF465f88</color>
+    <color name="on_secondary">#FFFFFFFF</color>
+    <color name="secondary_container">#FFb6d0ff</color>
+    <color name="on_secondary_container">#FF3f5881</color>
+
+    <color name="tertiary">#FF5a5f62</color>
+    <color name="on_tertiary">#FFFFFFFF</color>
+    <color name="tertiary_container">#FF9da1a5</color>
+    <color name="on_tertiary_container">#FF33383b</color>
+
+    <color name="error">#FFba1a1a</color>
+    <color name="on_error">#FFFFFFFF</color>
+    <color name="error_container">#FFffdad6</color>
+    <color name="on_error_container">#FF93000a</color>
+
+    <color name="background">#FFf8f9ff</color>
+    <color name="on_background">#FF0b1c30</color>
+
+    <color name="surface">#FFf8f9ff</color>
+    <color name="on_surface">#FF0b1c30</color>
+    <color name="surface_variant">#FFd3e4fe</color>
+    <color name="on_surface_variant">#FF3d4a41</color>
+    <color name="inverse_surface">#FF213145</color>
+    <color name="inverse_on_surface">#FFeaf1ff</color>
+
+    <color name="surface_dim">#FFcbdbf5</color>
+    <color name="surface_bright">#FFf8f9ff</color>
+    <color name="surface_container_lowest">#FFffffff</color>
+    <color name="surface_container_low">#FFeff4ff</color>
+    <color name="surface_container">#FFe5eeff</color>
+    <color name="surface_container_high">#FFdce9ff</color>
+    <color name="surface_container_highest">#FFd3e4fe</color>
+
+    <color name="outline">#FF6d7a71</color>
+    <color name="outline_variant">#FFbccabf</color>
+    <color name="surface_tint">#FF006c46</color>
+
+    <color name="primary_fixed">#FF7cfabb</color>
+    <color name="primary_fixed_dim">#FF5edda0</color>
+    <color name="secondary_fixed">#FFd6e3ff</color>
+    <color name="secondary_fixed_dim">#FFaec7f6</color>
+
+    <!-- Legacy fallback colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Launcher icon colors -->
+    <color name="ic_launcher_background">#e5eeff</color>
 </resources>

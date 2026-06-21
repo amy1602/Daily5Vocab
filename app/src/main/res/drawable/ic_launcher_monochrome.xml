@@ -6,15 +6,13 @@
     android:viewportHeight="1024">
 
     <!--
-        Daily5Vocab Launcher Foreground
-        Open book with "En" text on left page, bookmark with "5" on right page
-        Viewport: 1024x1024 to match original design coordinates
-        Content shifted up by 88px to center vertically in safe zone
+        Daily5Vocab Monochrome icon (Android 13+ themed icons)
+        Same book design, single color for system tinting
     -->
 
-    <!-- Open Book (white) -->
+    <!-- Open Book -->
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="#000000"
         android:pathData="M300,362
                   L300,662
                   Q300,692 330,692
@@ -27,29 +25,24 @@
                   L330,332
                   Q300,332 300,362 Z" />
 
-    <!-- Book center spine line -->
+    <!-- Book center spine cutout -->
     <path
-        android:fillColor="#2eb67d"
+        android:fillColor="#00000000"
         android:pathData="M508,362 L508,662 L516,662 L516,362 Z" />
 
-    <!-- Left Page: "E" letter -->
+    <!-- Left Page "E" cutout -->
     <path
-        android:fillColor="#2eb67d"
+        android:fillColor="#00000000"
         android:pathData="M350,440 L410,440 L410,462 L375,462 L375,494 L405,494 L405,516 L375,516 L375,548 L410,548 L410,570 L350,570 Z" />
 
-    <!-- Left Page: "n" letter -->
+    <!-- Left Page "n" cutout -->
     <path
-        android:fillColor="#2eb67d"
+        android:fillColor="#00000000"
         android:pathData="M425,494 L448,494 L448,510 Q456,494 475,494 Q495,494 495,520 L495,570 L472,570 L472,525 Q472,514 462,514 Q452,514 448,525 L448,570 L425,570 Z" />
 
-    <!-- Right Page: Bookmark ribbon -->
+    <!-- Bookmark ribbon cutout -->
     <path
-        android:fillColor="#2eb67d"
+        android:fillColor="#00000000"
         android:pathData="M576,332 L648,332 L648,512 L612,476 L576,512 Z" />
-
-    <!-- Right Page: "5" on bookmark -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M598,370 L636,370 L636,390 L618,390 L618,406 Q624,398 634,398 Q646,398 646,420 L646,440 Q646,458 628,458 Q610,458 600,446 L612,432 Q618,440 626,440 Q632,440 632,430 L632,420 Q632,412 624,412 Q618,412 614,418 L602,414 L602,370 Z" />
 
 </vector>
