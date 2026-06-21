@@ -21,3 +21,15 @@ val PlaceholderGray = Color(0xFF9AA3B2)
 val IconGray = Color(0xFF6B7280)
 val BgGradientTop = Color(0xFFF1F2FB)
 val BgGradientBottom = Color(0xFFEAF3EE)
+
+// "Growth & Clarity" design-system palette (Today / dashboard screens)
+val GrowthSurface = Color(0xFFF8F9FF)        // app background (surface)
+val GrowthCard = Color(0xFFFFFFFF)           // level-1 card surface
+val GrowthGreen = Color(0xFF2EB67D)          // primary-container: ring + accents
+val GrowthGreenDeep = Color(0xFF006C46)      // primary: progress + emphasis
+val OxfordBlue = Color(0xFF0B1C30)           // on-surface headings / body
+val SlateGray = Color(0xFF3D4A41)            // on-surface-variant / meta + icons
+val SkyTrack = Color(0xFFD3E4FE)             // surface-variant: progress track
+val SkyContainer = Color(0xFFDCE9FF)         // surface-container-high: streak badge
+val OxfordSecondary = Color(0xFF465F88)      // secondary: streak count text
+val StreakFlame = Color(0xFFF59E0B)          // habit flame accent

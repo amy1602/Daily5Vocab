@@ -10,11 +10,13 @@ import com.amy.daily5vocab.ui.auth.AuthViewModel
 import com.amy.daily5vocab.ui.auth.LoginScreen
 import com.amy.daily5vocab.ui.auth.RegisterScreen
 import com.amy.daily5vocab.ui.onboarding.OnboardingScreen
+import com.amy.daily5vocab.ui.today.TodayScreen
 
 object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val ONBOARDING = "onboarding"
+    const val TODAY = "today"
 }
 
 @Composable
@@ -61,9 +63,16 @@ fun AppNavigation() {
         }
         composable(Routes.ONBOARDING) {
             OnboardingScreen(
-                // No navigation wired yet, as requested.
-                onStartLearning = { /* TODO: persist topics + go to the daily screen */ },
+                onStartLearning = {
+                    // TODO: persist selected topics.
+                    navController.navigate(Routes.TODAY) {
+                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+                    }
+                },
             )
+        }
+        composable(Routes.TODAY) {
+            TodayScreen()
         }
     }
 }
