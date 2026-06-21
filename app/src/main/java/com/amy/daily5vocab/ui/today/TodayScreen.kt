@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,6 +57,7 @@ fun TodayScreen(
     words: List<String> = listOf("Resilient", "Ephemeral", "Pragmatic", "Leverage", "Synergy"),
     completed: Int = 0,
     streak: Int = 5,
+    isLoading: Boolean = false,
     selectedTab: AppTab = AppTab.Today,
     onWordClick: (String) -> Unit = {},
     onTabSelected: (AppTab) -> Unit = {},
@@ -65,6 +67,17 @@ fun TodayScreen(
         onTabSelected = onTabSelected,
         streak = streak,
     ) { innerPadding ->
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = GrowthGreenDeep)
+            }
+            return@AppScaffold
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()

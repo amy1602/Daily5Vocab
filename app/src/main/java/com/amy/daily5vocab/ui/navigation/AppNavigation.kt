@@ -1,21 +1,32 @@
 package com.amy.daily5vocab.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.amy.daily5vocab.data.auth.AuthRepository
+import com.amy.daily5vocab.data.user.UserRepository
 import com.amy.daily5vocab.ui.auth.AuthViewModel
 import com.amy.daily5vocab.ui.auth.LoginScreen
 import com.amy.daily5vocab.ui.auth.RegisterScreen
 import com.amy.daily5vocab.ui.common.AppTab
 import com.amy.daily5vocab.ui.onboarding.OnboardingScreen
+import com.amy.daily5vocab.ui.onboarding.OnboardingViewModel
 import com.amy.daily5vocab.ui.settings.SettingsScreen
+import com.amy.daily5vocab.ui.theme.GrowthGreenDeep
 import com.amy.daily5vocab.ui.today.TodayScreen
-import androidx.navigation.NavController
+import com.amy.daily5vocab.ui.today.TodayViewModel
 
 object Routes {
+    const val LAUNCH = "launch"
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val ONBOARDING = "onboarding"
@@ -41,21 +52,25 @@ private fun NavController.selectTab(tab: AppTab) {
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    // Skip auth if a user session already exists.
-    val startDestination = if (AuthRepository().currentUser != null) {
-        Routes.ONBOARDING
-    } else {
-        Routes.LOGIN
-    }
-
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(navController = navController, startDestination = Routes.LAUNCH) {
+        // Decides where to send the user: auth -> onboarding (no topics yet) -> today.
+        composable(Routes.LAUNCH) {
+            LaunchGate(
+                onRoute = { route ->
+                    navController.navigate(route) {
+                        popUpTo(Routes.LAUNCH) { inclusive = true }
+                    }
+                },
+            )
+        }
         composable(Routes.LOGIN) {
             val viewModel: AuthViewModel = viewModel()
             LoginScreen(
                 onNavigateToRegister = { navController.navigate(Routes.REGISTER) },
                 onLogin = { email, password ->
                     viewModel.login(email, password) {
-                        navController.navigate(Routes.ONBOARDING) {
+                        // Returning users may already have topics; let the gate decide.
+                        navController.navigate(Routes.LAUNCH) {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     }
@@ -70,7 +85,8 @@ fun AppNavigation() {
                 onNavigateToLogin = { navController.popBackStack() },
                 onRegister = { name, email, password ->
                     viewModel.register(name, email, password) {
-                        navController.navigate(Routes.ONBOARDING) {
+                        // New accounts have no topics yet -> the gate routes to onboarding.
+                        navController.navigate(Routes.LAUNCH) {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     }
@@ -80,17 +96,26 @@ fun AppNavigation() {
             )
         }
         composable(Routes.ONBOARDING) {
+            val viewModel: OnboardingViewModel = viewModel()
             OnboardingScreen(
-                onStartLearning = {
-                    // TODO: persist selected topics.
-                    navController.navigate(Routes.TODAY) {
-                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+                onStartLearning = { selected ->
+                    viewModel.saveTopics(selected) {
+                        navController.navigate(Routes.TODAY) {
+                            popUpTo(Routes.ONBOARDING) { inclusive = true }
+                        }
                     }
                 },
+                isSaving = viewModel.uiState.isSaving,
+                errorMessage = viewModel.uiState.errorMessage,
             )
         }
         composable(Routes.TODAY) {
+            val viewModel: TodayViewModel = viewModel()
+            val state = viewModel.uiState
             TodayScreen(
+                topic = state.topic,
+                words = state.words,
+                isLoading = state.isLoading,
                 selectedTab = AppTab.Today,
                 onTabSelected = { navController.selectTab(it) },
             )
@@ -107,5 +132,29 @@ fun AppNavigation() {
                 },
             )
         }
+    }
+}
+
+/**
+ * Loading gate that resolves the right start destination once:
+ *  - not signed in           -> Login
+ *  - signed in, no topics yet -> Onboarding (shown only this once)
+ *  - signed in, has topics    -> Today
+ */
+@Composable
+private fun LaunchGate(onRoute: (String) -> Unit) {
+    LaunchedEffect(Unit) {
+        if (AuthRepository().currentUser == null) {
+            onRoute(Routes.LOGIN)
+            return@LaunchedEffect
+        }
+        UserRepository().getTopics { result ->
+            val hasTopics = result.getOrNull()?.isNotEmpty() == true
+            onRoute(if (hasTopics) Routes.TODAY else Routes.ONBOARDING)
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(color = GrowthGreenDeep)
     }
 }

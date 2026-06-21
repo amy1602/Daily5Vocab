@@ -43,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.amy.daily5vocab.ui.auth.AuthBackground
+import com.amy.daily5vocab.ui.auth.AuthErrorText
 import com.amy.daily5vocab.ui.auth.PrimaryButton
 import com.amy.daily5vocab.ui.auth.clickableText
 import com.amy.daily5vocab.ui.theme.BrandGreen
@@ -67,6 +68,8 @@ private val Topics = listOf(
 @Composable
 fun OnboardingScreen(
     onStartLearning: (selected: Set<String>) -> Unit = {},
+    isSaving: Boolean = false,
+    errorMessage: String? = null,
 ) {
     var selected by remember { mutableStateOf(emptySet<String>()) }
 
@@ -124,11 +127,18 @@ fun OnboardingScreen(
                 Spacer(Modifier.height(16.dp))
             }
 
+            if (errorMessage != null) {
+                AuthErrorText(errorMessage)
+                Spacer(Modifier.height(12.dp))
+            }
+
             Spacer(Modifier.height(12.dp))
 
             PrimaryButton(
                 text = "Start Learning",
                 onClick = { onStartLearning(selected) },
+                isLoading = isSaving,
+                enabled = selected.isNotEmpty(),
             )
         }
     }
