@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.History
@@ -41,6 +42,7 @@ import com.amy.daily5vocab.ui.theme.GrowthCard
 import com.amy.daily5vocab.ui.theme.GrowthGreen
 import com.amy.daily5vocab.ui.theme.GrowthGreenDeep
 import com.amy.daily5vocab.ui.theme.GrowthSurface
+import com.amy.daily5vocab.ui.theme.OxfordBlue
 import com.amy.daily5vocab.ui.theme.OxfordSecondary
 import com.amy.daily5vocab.ui.theme.SkyContainer
 import com.amy.daily5vocab.ui.theme.SlateGray
@@ -61,15 +63,55 @@ enum class AppTab(val label: String, val icon: ImageVector) {
 fun AppScaffold(
     selectedTab: AppTab,
     onTabSelected: (AppTab) -> Unit,
-    streak: Int,
+    streak: Int = 0,
+    topBar: @Composable () -> Unit = { AppTopBar(streak = streak) },
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
         containerColor = GrowthSurface,
-        topBar = { AppTopBar(streak = streak) },
+        topBar = topBar,
         bottomBar = { AppBottomNav(selected = selectedTab, onTabSelected = onTabSelected) },
         content = content,
     )
+}
+
+/**
+ * Top bar for secondary screens reached from a tab: a back arrow followed by the
+ * screen [title]. Pair with [AppScaffold]'s `topBar` slot to keep the bottom nav.
+ */
+@Composable
+fun AppBackTopBar(title: String, onBack: () -> Unit) {
+    Surface(color = GrowthSurface) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .clickableText(onBack),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = OxfordBlue,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+            Spacer(Modifier.size(8.dp))
+            Text(
+                text = title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = OxfordBlue,
+            )
+        }
+    }
 }
 
 @Composable

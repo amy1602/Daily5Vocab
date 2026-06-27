@@ -4,9 +4,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -24,6 +28,8 @@ import com.amy.daily5vocab.ui.settings.SettingsScreen
 import com.amy.daily5vocab.ui.theme.GrowthGreenDeep
 import com.amy.daily5vocab.ui.today.TodayScreen
 import com.amy.daily5vocab.ui.today.TodayViewModel
+import com.amy.daily5vocab.ui.topic.ChangeTopicScreen
+import com.amy.daily5vocab.ui.topic.ChangeTopicViewModel
 
 object Routes {
     const val LAUNCH = "launch"
@@ -32,6 +38,7 @@ object Routes {
     const val ONBOARDING = "onboarding"
     const val TODAY = "today"
     const val SETTINGS = "settings"
+    const val CHANGE_TOPIC = "change_topic"
 }
 
 /** Switches between the bottom-nav tab destinations without stacking duplicates. */
@@ -111,6 +118,16 @@ fun AppNavigation() {
         }
         composable(Routes.TODAY) {
             val viewModel: TodayViewModel = viewModel()
+            // Refresh when this destination resumes so topic edits made in Settings
+            // (which can change the default topic) are reflected on return.
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) viewModel.load()
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+            }
             val state = viewModel.uiState
             TodayScreen(
                 topic = state.topic,
@@ -124,12 +141,28 @@ fun AppNavigation() {
             SettingsScreen(
                 selectedTab = AppTab.Settings,
                 onTabSelected = { navController.selectTab(it) },
+                onChangeTopics = { navController.navigate(Routes.CHANGE_TOPIC) },
                 onSignOut = {
                     AuthRepository().logout()
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
+            )
+        }
+        composable(Routes.CHANGE_TOPIC) {
+            val viewModel: ChangeTopicViewModel = viewModel()
+            val state = viewModel.uiState
+            ChangeTopicScreen(
+                selected = state.selected,
+                onToggle = { viewModel.toggle(it) },
+                onSave = { viewModel.save { navController.popBackStack() } },
+                onBack = { navController.popBackStack() },
+                canSave = state.hasChanges,
+                isSaving = state.isSaving,
+                errorMessage = state.errorMessage,
+                selectedTab = AppTab.Settings,
+                onTabSelected = { navController.selectTab(it) },
             )
         }
     }

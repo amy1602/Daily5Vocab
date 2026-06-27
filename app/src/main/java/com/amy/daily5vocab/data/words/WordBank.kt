@@ -39,6 +39,16 @@ object WordBank {
             "Molecule", "Inertia", "Genome", "Quantum", "Osmosis",
             "Isotope", "Equilibrium",
         ),
+        "Literature" to listOf(
+            "Metaphor", "Allegory", "Prose", "Protagonist", "Narrative",
+            "Foreshadow", "Verse", "Soliloquy", "Motif", "Satire",
+            "Imagery", "Anthology",
+        ),
+        "Psychology" to listOf(
+            "Cognition", "Empathy", "Resilience", "Perception", "Bias",
+            "Catharsis", "Conditioning", "Introspection", "Motivation", "Stimulus",
+            "Disposition", "Reinforce",
+        ),
     )
 
     /** Topic used when a user somehow has no saved topic yet. */

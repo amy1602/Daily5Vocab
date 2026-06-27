@@ -25,17 +25,21 @@ class TodayViewModel(
         load()
     }
 
-    /** Loads the user's default topic from Firebase and samples 5 random words from it. */
+    /**
+     * Loads the user's default topic (the first saved one) from Firebase. Re-samples the
+     * 5 words only when that topic changed, so returning to this screen — e.g. after editing
+     * topics in Settings — reflects the new focus without reshuffling an unchanged day's set.
+     */
     fun load() {
-        uiState = TodayUiState(isLoading = true)
         repository.getTopics { result ->
             result
                 .onSuccess { topics ->
                     val topic = topics.firstOrNull() ?: WordBank.DEFAULT_TOPIC
+                    val keepWords = topic == uiState.topic && uiState.words.isNotEmpty()
                     uiState = TodayUiState(
                         isLoading = false,
                         topic = topic,
-                        words = WordBank.pickWords(topic),
+                        words = if (keepWords) uiState.words else WordBank.pickWords(topic),
                     )
                 }
                 .onFailure { error ->
