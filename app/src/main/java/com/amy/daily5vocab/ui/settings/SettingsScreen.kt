@@ -79,6 +79,7 @@ fun SettingsScreen(
     onSignOut: () -> Unit = {},
 ) {
     var showTimePicker by remember { mutableStateOf(false) }
+    var showSignOutDialog by remember { mutableStateOf(false) }
 
     AppScaffold(
         selectedTab = selectedTab,
@@ -184,7 +185,7 @@ fun SettingsScreen(
                     title = "Sign Out",
                     titleColor = ErrorRed,
                     showChevron = false,
-                    onClick = onSignOut,
+                    onClick = { showSignOutDialog = true },
                 )
             }
 
@@ -200,6 +201,29 @@ fun SettingsScreen(
                 onReminderTimeSelected(it)
             },
             onDismiss = { showTimePicker = false },
+        )
+    }
+
+    if (showSignOutDialog) {
+        AlertDialog(
+            onDismissRequest = { showSignOutDialog = false },
+            title = { Text("Sign Out", fontWeight = FontWeight.Bold, color = OxfordBlue) },
+            text = { Text("Are you sure you want to sign out?", color = SlateGray) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSignOutDialog = false
+                        onSignOut()
+                    },
+                ) {
+                    Text("Sign Out", color = ErrorRed, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSignOutDialog = false }) {
+                    Text("Cancel", color = SlateGray)
+                }
+            },
         )
     }
 }
