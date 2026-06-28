@@ -1,8 +1,10 @@
 package com.amy.daily5vocab.data.auth
 
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseUser
@@ -52,6 +54,45 @@ class AuthRepository(
             .addOnFailureListener { onResult(Result.failure(Exception(registerErrorMessage(it)))) }
     }
 
+    /** Re-authenticates with [currentPassword] only, to confirm it is correct. */
+    fun verifyPassword(currentPassword: String, onResult: (Result<Unit>) -> Unit) {
+        val user = auth.currentUser
+        val email = user?.email
+        if (user == null || email == null) {
+            onResult(Result.failure(Exception("You need to be signed in.")))
+            return
+        }
+        val credential = EmailAuthProvider.getCredential(email, currentPassword)
+        user.reauthenticate(credential)
+            .addOnSuccessListener { onResult(Result.success(Unit)) }
+            .addOnFailureListener { onResult(Result.failure(Exception(changePasswordErrorMessage(it)))) }
+    }
+
+    /**
+     * Re-authenticates with [currentPassword] (required by Firebase before sensitive
+     * changes) and then sets [newPassword].
+     */
+    fun changePassword(
+        currentPassword: String,
+        newPassword: String,
+        onResult: (Result<Unit>) -> Unit,
+    ) {
+        val user = auth.currentUser
+        val email = user?.email
+        if (user == null || email == null) {
+            onResult(Result.failure(Exception("You need to be signed in.")))
+            return
+        }
+        val credential = EmailAuthProvider.getCredential(email, currentPassword)
+        user.reauthenticate(credential)
+            .addOnSuccessListener {
+                user.updatePassword(newPassword)
+                    .addOnSuccessListener { onResult(Result.success(Unit)) }
+                    .addOnFailureListener { onResult(Result.failure(Exception(changePasswordErrorMessage(it)))) }
+            }
+            .addOnFailureListener { onResult(Result.failure(Exception(changePasswordErrorMessage(it)))) }
+    }
+
     fun logout() {
         UserCache.clear()
         auth.signOut()
@@ -64,6 +105,20 @@ class AuthRepository(
         is FirebaseAuthInvalidUserException -> "No account exists with this email."
         is FirebaseAuthInvalidCredentialsException -> "Incorrect email or password."
         else -> error.message ?: "Unable to sign in. Please try again."
+    }
+
+    /** Maps Firebase password-change failures to messages a user can act on. */
+    private fun changePasswordErrorMessage(error: Throwable): String = when (error) {
+        // Wrong current password (email-enumeration protection reports it here too).
+        is FirebaseAuthInvalidCredentialsException -> INCORRECT_CURRENT_PASSWORD
+        is FirebaseAuthWeakPasswordException -> "Password is too weak. Use at least 8 characters."
+        is FirebaseAuthRecentLoginRequiredException -> "Please sign in again before changing your password."
+        else -> error.message ?: "Couldn't change your password. Please try again."
+    }
+
+    companion object {
+        /** Shown when the entered current password fails re-authentication. */
+        const val INCORRECT_CURRENT_PASSWORD = "Your current password is incorrect."
     }
 
     /** Maps Firebase sign-up failures to messages a user can act on. */

@@ -19,6 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import com.amy.daily5vocab.data.auth.AuthRepository
 import com.amy.daily5vocab.data.user.UserRepository
 import com.amy.daily5vocab.ui.auth.AuthViewModel
+import com.amy.daily5vocab.ui.auth.ChangePasswordScreen
+import com.amy.daily5vocab.ui.auth.ChangePasswordViewModel
 import com.amy.daily5vocab.ui.auth.LoginScreen
 import com.amy.daily5vocab.ui.auth.RegisterScreen
 import com.amy.daily5vocab.ui.common.AppTab
@@ -40,6 +42,7 @@ object Routes {
     const val TODAY = "today"
     const val SETTINGS = "settings"
     const val CHANGE_TOPIC = "change_topic"
+    const val CHANGE_PASSWORD = "change_password"
 }
 
 /** Switches between the bottom-nav tab destinations without stacking duplicates. */
@@ -146,6 +149,7 @@ fun AppNavigation() {
                 selectedTab = AppTab.Settings,
                 onTabSelected = { navController.selectTab(it) },
                 onChangeTopics = { navController.navigate(Routes.CHANGE_TOPIC) },
+                onOpenProfile = { navController.navigate(Routes.CHANGE_PASSWORD) },
                 onSignOut = {
                     AuthRepository().logout()
                     navController.navigate(Routes.LOGIN) {
@@ -167,6 +171,21 @@ fun AppNavigation() {
                 errorMessage = state.errorMessage,
                 selectedTab = AppTab.Settings,
                 onTabSelected = { navController.selectTab(it) },
+            )
+        }
+        composable(Routes.CHANGE_PASSWORD) {
+            val viewModel: ChangePasswordViewModel = viewModel()
+            ChangePasswordScreen(
+                onBack = { navController.popBackStack() },
+                onSave = { current, new, confirm ->
+                    viewModel.changePassword(current, new, confirm) {
+                        navController.popBackStack()
+                    }
+                },
+                state = viewModel.uiState,
+                onCurrentBlur = { viewModel.verifyCurrentPassword(it) },
+                onNewBlur = { new, confirm -> viewModel.validateNewPassword(new, confirm) },
+                onConfirmBlur = { new, confirm -> viewModel.validateConfirmPassword(new, confirm) },
             )
         }
     }
