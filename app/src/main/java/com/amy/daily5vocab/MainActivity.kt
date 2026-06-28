@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.amy.daily5vocab.data.history.HistoryRepository
 import com.amy.daily5vocab.data.user.UserCache
 import com.amy.daily5vocab.reminder.ReminderNotifier
 import com.amy.daily5vocab.reminder.ReminderScheduler
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         UserCache.init(this)
+        HistoryRepository.init(this)
         ReminderNotifier.ensureChannel(this)
         // Re-apply any saved reminder schedule (alarms are cleared on reboot/reinstall).
         ReminderScheduler.rescheduleIfEnabled(this)

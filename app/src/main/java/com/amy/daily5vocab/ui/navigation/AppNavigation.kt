@@ -24,6 +24,8 @@ import com.amy.daily5vocab.ui.auth.ChangePasswordViewModel
 import com.amy.daily5vocab.ui.auth.LoginScreen
 import com.amy.daily5vocab.ui.auth.RegisterScreen
 import com.amy.daily5vocab.ui.common.AppTab
+import com.amy.daily5vocab.ui.history.HistoryScreen
+import com.amy.daily5vocab.ui.history.HistoryViewModel
 import com.amy.daily5vocab.ui.onboarding.OnboardingScreen
 import com.amy.daily5vocab.ui.onboarding.OnboardingViewModel
 import com.amy.daily5vocab.ui.settings.SettingsScreen
@@ -40,6 +42,7 @@ object Routes {
     const val REGISTER = "register"
     const val ONBOARDING = "onboarding"
     const val TODAY = "today"
+    const val HISTORY = "history"
     const val SETTINGS = "settings"
     const val CHANGE_TOPIC = "change_topic"
     const val CHANGE_PASSWORD = "change_password"
@@ -49,8 +52,8 @@ object Routes {
 private fun NavController.selectTab(tab: AppTab) {
     val route = when (tab) {
         AppTab.Today -> Routes.TODAY
+        AppTab.History -> Routes.HISTORY
         AppTab.Settings -> Routes.SETTINGS
-        AppTab.History -> return // History screen not built yet.
     }
     if (route == currentDestination?.route) return
     navigate(route) {
@@ -138,6 +141,20 @@ fun AppNavigation() {
                 words = state.words,
                 isLoading = state.isLoading,
                 selectedTab = AppTab.Today,
+                onToggleWord = { viewModel.toggle(it) },
+                onTabSelected = { navController.selectTab(it) },
+            )
+        }
+        composable(Routes.HISTORY) {
+            val viewModel: HistoryViewModel = viewModel()
+            HistoryScreen(
+                groups = viewModel.groups,
+                selectedRange = viewModel.selectedRange,
+                onRangeSelected = { viewModel.selectRange(it) },
+                isLoading = viewModel.isLoading,
+                canLoadMore = viewModel.canLoadMore,
+                onLoadMore = { viewModel.loadMore() },
+                selectedTab = AppTab.History,
                 onTabSelected = { navController.selectTab(it) },
             )
         }

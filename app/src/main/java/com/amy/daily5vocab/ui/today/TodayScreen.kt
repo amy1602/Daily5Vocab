@@ -1,6 +1,7 @@
 package com.amy.daily5vocab.ui.today
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -54,14 +56,14 @@ import com.amy.daily5vocab.ui.theme.SlateGray
 @Composable
 fun TodayScreen(
     topic: String = "Business",
-    words: List<String> = listOf("Resilient", "Ephemeral", "Pragmatic", "Leverage", "Synergy"),
-    completed: Int = 0,
+    words: List<TodayWord> = emptyList(),
     streak: Int = 5,
     isLoading: Boolean = false,
     selectedTab: AppTab = AppTab.Today,
-    onWordClick: (String) -> Unit = {},
+    onToggleWord: (TodayWord) -> Unit = {},
     onTabSelected: (AppTab) -> Unit = {},
 ) {
+    val completed = words.count { it.learned }
     AppScaffold(
         selectedTab = selectedTab,
         onTabSelected = onTabSelected,
@@ -115,7 +117,7 @@ fun TodayScreen(
             Spacer(Modifier.height(20.dp))
 
             words.forEach { word ->
-                WordCard(word = word, onClick = { onWordClick(word) })
+                WordCard(word = word, onClick = { onToggleWord(word) })
                 Spacer(Modifier.height(10.dp))
             }
 
@@ -177,7 +179,7 @@ private fun ProgressRing(completed: Int, total: Int) {
 }
 
 @Composable
-private fun WordCard(word: String, onClick: () -> Unit) {
+private fun WordCard(word: TodayWord, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -192,24 +194,36 @@ private fun WordCard(word: String, onClick: () -> Unit) {
                 .padding(horizontal = 18.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(
-                modifier = Modifier
-                    .size(22.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, SkyTrack, CircleShape),
-            )
+            if (word.learned) {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .background(GrowthGreen),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = "Learned",
+                        tint = Color.White,
+                        modifier = Modifier.size(15.dp),
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, SkyTrack, CircleShape),
+                )
+            }
             Spacer(Modifier.size(14.dp))
             Text(
-                text = word,
+                text = word.word,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
                 color = OxfordBlue,
                 modifier = Modifier.weight(1f),
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = SlateGray,
             )
         }
     }

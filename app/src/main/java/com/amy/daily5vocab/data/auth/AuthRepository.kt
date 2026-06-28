@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.amy.daily5vocab.data.history.HistoryRepository
 import com.amy.daily5vocab.data.user.UserCache
 
 /**
@@ -95,6 +96,7 @@ class AuthRepository(
 
     fun logout() {
         UserCache.clear()
+        HistoryRepository.clearSession()
         auth.signOut()
     }
 
