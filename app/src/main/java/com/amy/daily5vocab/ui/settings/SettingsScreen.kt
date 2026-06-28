@@ -21,12 +21,21 @@ import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,10 +74,12 @@ fun SettingsScreen(
     onTabSelected: (AppTab) -> Unit = {},
     onChangeTopics: () -> Unit = {},
     onChangeDifficulty: () -> Unit = {},
-    onEditReminderTime: () -> Unit = {},
+    onReminderTimeSelected: (String) -> Unit = {},
     onOpenProfile: () -> Unit = {},
     onSignOut: () -> Unit = {},
 ) {
+    var showTimePicker by remember { mutableStateOf(false) }
+
     AppScaffold(
         selectedTab = selectedTab,
         onTabSelected = onTabSelected,
@@ -145,7 +156,7 @@ fun SettingsScreen(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
                             .background(SkyContainer)
-                            .clickableText(onEditReminderTime)
+                            .clickableText { showTimePicker = true }
                             .padding(horizontal = 16.dp, vertical = 12.dp),
                     ) {
                         Text(
@@ -180,6 +191,52 @@ fun SettingsScreen(
             Spacer(Modifier.height(16.dp))
         }
     }
+
+    if (showTimePicker) {
+        ReminderTimeDialog(
+            initial = reminderTime,
+            onConfirm = {
+                showTimePicker = false
+                onReminderTimeSelected(it)
+            },
+            onDismiss = { showTimePicker = false },
+        )
+    }
+}
+
+/** Clock dialog for picking the daily reminder time, seeded from the current [initial] value. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReminderTimeDialog(
+    initial: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val (initialHour, initialMinute) = parseTime(initial)
+    val state = rememberTimePickerState(
+        initialHour = initialHour,
+        initialMinute = initialMinute,
+        is24Hour = false,
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Reminder Time", fontWeight = FontWeight.Bold, color = OxfordBlue) },
+        text = {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                TimePicker(state = state)
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(formatTime(state.hour, state.minute)) }) {
+                Text("OK", color = GrowthGreenDeep, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = SlateGray)
+            }
+        },
+    )
 }
 
 @Composable

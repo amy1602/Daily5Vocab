@@ -25,6 +25,7 @@ import com.amy.daily5vocab.ui.common.AppTab
 import com.amy.daily5vocab.ui.onboarding.OnboardingScreen
 import com.amy.daily5vocab.ui.onboarding.OnboardingViewModel
 import com.amy.daily5vocab.ui.settings.SettingsScreen
+import com.amy.daily5vocab.ui.settings.SettingsViewModel
 import com.amy.daily5vocab.ui.theme.GrowthGreenDeep
 import com.amy.daily5vocab.ui.today.TodayScreen
 import com.amy.daily5vocab.ui.today.TodayViewModel
@@ -138,7 +139,10 @@ fun AppNavigation() {
             )
         }
         composable(Routes.SETTINGS) {
+            val viewModel: SettingsViewModel = viewModel()
             SettingsScreen(
+                reminderTime = viewModel.uiState.reminderTime,
+                onReminderTimeSelected = { viewModel.setReminderTime(it) },
                 selectedTab = AppTab.Settings,
                 onTabSelected = { navController.selectTab(it) },
                 onChangeTopics = { navController.navigate(Routes.CHANGE_TOPIC) },

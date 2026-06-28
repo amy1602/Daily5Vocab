@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.amy.daily5vocab.data.user.UserCache
 
 /**
  * Thin wrapper around [FirebaseAuth] for email/password auth.
@@ -51,7 +52,10 @@ class AuthRepository(
             .addOnFailureListener { onResult(Result.failure(Exception(registerErrorMessage(it)))) }
     }
 
-    fun logout() = auth.signOut()
+    fun logout() {
+        UserCache.clear()
+        auth.signOut()
+    }
 
     /** Maps Firebase sign-in failures to messages a user can act on. */
     private fun loginErrorMessage(error: Throwable): String = when (error) {

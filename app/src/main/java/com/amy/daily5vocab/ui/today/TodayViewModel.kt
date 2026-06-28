@@ -39,7 +39,7 @@ class TodayViewModel(
                     uiState = TodayUiState(
                         isLoading = false,
                         topic = topic,
-                        words = if (keepWords) uiState.words else WordBank.pickWords(topic),
+                        words = if (keepWords) uiState.words else WordBank.pickWords(topic).map { it.term },
                     )
                 }
                 .onFailure { error ->
