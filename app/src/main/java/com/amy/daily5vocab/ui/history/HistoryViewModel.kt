@@ -10,8 +10,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/** A learned word as shown in history. */
-data class HistoryEntry(val word: String, val topic: String)
+/** A learned word as shown in history. [id] opens its detail view ("{date}_{word}"). */
+data class HistoryEntry(val id: String, val word: String, val topic: String)
 
 /** Words learned on a given day, expressed as a [daysAgo] offset from today. */
 data class HistoryGroup(val daysAgo: Int, val entries: List<HistoryEntry>)
@@ -71,7 +71,7 @@ class HistoryViewModel : ViewModel() {
             .mapNotNull { (date, words) ->
                 val days = daysAgo(date)
                 if (days in 0..selectedRange.maxDaysAgo) {
-                    HistoryGroup(days, words.map { HistoryEntry(it.word, it.topic) })
+                    HistoryGroup(days, words.map { HistoryEntry(it.id, it.word, it.topic) })
                 } else {
                     null
                 }

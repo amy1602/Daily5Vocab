@@ -1,11 +1,16 @@
 package com.amy.daily5vocab.ui.navigation
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -13,11 +18,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.amy.daily5vocab.data.auth.AuthRepository
+import com.amy.daily5vocab.data.history.HistoryRepository
 import com.amy.daily5vocab.data.user.UserRepository
+import com.amy.daily5vocab.data.words.WordBank
 import com.amy.daily5vocab.ui.auth.AuthViewModel
 import com.amy.daily5vocab.ui.auth.ChangePasswordScreen
 import com.amy.daily5vocab.ui.auth.ChangePasswordViewModel
@@ -35,6 +44,7 @@ import com.amy.daily5vocab.ui.today.TodayScreen
 import com.amy.daily5vocab.ui.today.TodayViewModel
 import com.amy.daily5vocab.ui.topic.ChangeTopicScreen
 import com.amy.daily5vocab.ui.topic.ChangeTopicViewModel
+import com.amy.daily5vocab.ui.worddetail.WordDetailScreen
 
 object Routes {
     const val LAUNCH = "launch"
@@ -46,6 +56,14 @@ object Routes {
     const val SETTINGS = "settings"
     const val CHANGE_TOPIC = "change_topic"
     const val CHANGE_PASSWORD = "change_password"
+    const val WORD_DETAIL = "word_detail/{wordId}?next={next}"
+
+    /**
+     * Route to the detail view for the word with the given id ("{date}_{word}").
+     * [showNext] toggles the "Next Word" button (shown from Today, hidden from History).
+     */
+    fun wordDetail(wordId: String, showNext: Boolean = true): String =
+        "word_detail/${Uri.encode(wordId)}?next=$showNext"
 }
 
 /** Switches between the bottom-nav tab destinations without stacking duplicates. */
@@ -142,6 +160,7 @@ fun AppNavigation() {
                 isLoading = state.isLoading,
                 selectedTab = AppTab.Today,
                 onToggleWord = { viewModel.toggle(it) },
+                onOpenWord = { navController.navigate(Routes.wordDetail(it.id)) },
                 onTabSelected = { navController.selectTab(it) },
             )
         }
@@ -156,6 +175,7 @@ fun AppNavigation() {
                 onLoadMore = { viewModel.loadMore() },
                 selectedTab = AppTab.History,
                 onTabSelected = { navController.selectTab(it) },
+                onWordClick = { navController.navigate(Routes.wordDetail(it.id, showNext = false)) },
             )
         }
         composable(Routes.SETTINGS) {
@@ -204,6 +224,42 @@ fun AppNavigation() {
                 onNewBlur = { new, confirm -> viewModel.validateNewPassword(new, confirm) },
                 onConfirmBlur = { new, confirm -> viewModel.validateConfirmPassword(new, confirm) },
             )
+        }
+        composable(
+            route = Routes.WORD_DETAIL,
+            arguments = listOf(
+                navArgument("wordId") { type = NavType.StringType },
+                navArgument("next") { type = NavType.BoolType; defaultValue = true },
+            ),
+        ) { backStackEntry ->
+            val wordId = backStackEntry.arguments?.getString("wordId").orEmpty()
+            val showNext = backStackEntry.arguments?.getBoolean("next") ?: true
+            // Read the current in-memory set once; the day's words are the "Next Word" pool.
+            val all = remember(wordId) { HistoryRepository.snapshot() }
+            val siblings = remember(wordId) {
+                val date = all.firstOrNull { it.id == wordId }?.date
+                if (date == null) emptyList() else all.filter { it.date == date }.sortedBy { it.word }
+            }
+            var index by remember(wordId) {
+                mutableIntStateOf(siblings.indexOfFirst { it.id == wordId }.coerceAtLeast(0))
+            }
+            val current = siblings.getOrNull(index)
+            if (current == null) {
+                LaunchedEffect(Unit) { navController.popBackStack() }
+            } else {
+                val vocab = remember(current.id) {
+                    WordBank.topicWords[current.topic]?.firstOrNull { it.term == current.word }
+                }
+                WordDetailScreen(
+                    word = current.word,
+                    topic = current.topic,
+                    meaning = vocab?.meaning.orEmpty(),
+                    phonetic = vocab?.phonetic?.takeIf { it.isNotBlank() },
+                    showNext = showNext,
+                    onBack = { navController.popBackStack() },
+                    onNext = { if (siblings.isNotEmpty()) index = (index + 1) % siblings.size },
+                )
+            }
         }
     }
 }

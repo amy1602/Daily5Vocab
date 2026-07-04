@@ -72,6 +72,7 @@ fun HistoryScreen(
     streak: Int = 5,
     selectedTab: AppTab = AppTab.History,
     onTabSelected: (AppTab) -> Unit = {},
+    onWordClick: (HistoryEntry) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
 
@@ -137,7 +138,8 @@ fun HistoryScreen(
                         count = group.entries.size,
                         key = { i -> "${group.daysAgo}-${group.entries[i].word}" },
                     ) { i ->
-                        HistoryWordCard(group.entries[i])
+                        val entry = group.entries[i]
+                        HistoryWordCard(entry, onClick = { onWordClick(entry) })
                         Spacer(Modifier.height(12.dp))
                     }
                 }
@@ -198,9 +200,11 @@ private fun RangeChip(label: String, isSelected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun HistoryWordCard(entry: HistoryEntry) {
+private fun HistoryWordCard(entry: HistoryEntry, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickableText(onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = GrowthCard),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
@@ -344,8 +348,8 @@ private fun HistoryScreenPreview() {
                 HistoryGroup(
                     1,
                     listOf(
-                        HistoryEntry("Synergy", "Business"),
-                        HistoryEntry("Ubiquitous", "General"),
+                        HistoryEntry("2024-10-23_Synergy", "Synergy", "Business"),
+                        HistoryEntry("2024-10-23_Ubiquitous", "Ubiquitous", "General"),
                     ),
                 ),
             ),

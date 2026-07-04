@@ -61,6 +61,7 @@ fun TodayScreen(
     isLoading: Boolean = false,
     selectedTab: AppTab = AppTab.Today,
     onToggleWord: (TodayWord) -> Unit = {},
+    onOpenWord: (TodayWord) -> Unit = {},
     onTabSelected: (AppTab) -> Unit = {},
 ) {
     val completed = words.count { it.learned }
@@ -117,7 +118,11 @@ fun TodayScreen(
             Spacer(Modifier.height(20.dp))
 
             words.forEach { word ->
-                WordCard(word = word, onClick = { onToggleWord(word) })
+                WordCard(
+                    word = word,
+                    onToggle = { onToggleWord(word) },
+                    onOpen = { onOpenWord(word) },
+                )
                 Spacer(Modifier.height(10.dp))
             }
 
@@ -179,11 +184,11 @@ private fun ProgressRing(completed: Int, total: Int) {
 }
 
 @Composable
-private fun WordCard(word: TodayWord, onClick: () -> Unit) {
+private fun WordCard(word: TodayWord, onToggle: () -> Unit, onOpen: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickableText(onClick),
+            .clickableText(onOpen),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = GrowthCard),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
@@ -199,7 +204,8 @@ private fun WordCard(word: TodayWord, onClick: () -> Unit) {
                     modifier = Modifier
                         .size(22.dp)
                         .clip(CircleShape)
-                        .background(GrowthGreen),
+                        .background(GrowthGreen)
+                        .clickableText(onToggle),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -214,7 +220,8 @@ private fun WordCard(word: TodayWord, onClick: () -> Unit) {
                     modifier = Modifier
                         .size(22.dp)
                         .clip(CircleShape)
-                        .border(2.dp, SkyTrack, CircleShape),
+                        .border(2.dp, SkyTrack, CircleShape)
+                        .clickableText(onToggle),
                 )
             }
             Spacer(Modifier.size(14.dp))
